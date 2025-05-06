@@ -1,43 +1,33 @@
-const fetch = require("node-fetch");
-
-exports.handler = async (event) => {
-  let path, method, headers, body;
-
+export const handler = async (event) => {
   try {
-    const parsedBody = event.body ? JSON.parse(event.body) : {};
-    path = parsedBody.path;
-    method = parsedBody.method || "GET";
-    headers = parsedBody.headers || {};
-    body = parsedBody.body;
-  } catch (error) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: "Invalid JSON body", detail: error.message }),
-    };
-  }
+    const { path, method, headers, body } = JSON.parse(event.body || '{}');
 
-  const gocardlessUrl = "https://bankaccountdata.gocardless.com/api/v2/" + path.replace("/api", "");
+    if (!path || !method) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Missing 'path' or 'method' in request body." }),
+      };
+    }
 
-  try {
-    const response = await fetch(gocardlessUrl, {
+    const apiUrl = `https://bankaccountdata.gocardless.com/api/v2/${path.replace(/^\/+/, '')}`;
+
+    const response = await fetch(apiUrl, {
       method,
-      headers: {
-        "Authorization": headers["authorization"],
-        "Content-Type": "application/json"
-      },
-      body: method !== "GET" ? JSON.stringify(body) : undefined
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
     });
 
     const data = await response.json();
 
     return {
       statusCode: response.status,
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     };
+
   } catch (error) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: error.message })
+      body: JSON.stringify({ error: error.message, stack: error.stack }),
     };
   }
 };
