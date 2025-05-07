@@ -1,6 +1,6 @@
 export const handler = async (event) => {
   try {
-    const { path, method, headers, body } = JSON.parse(event.body || '{}');
+    const { path, method, headers = {}, body } = JSON.parse(event.body || '{}');
 
     if (!path || !method) {
       return {
@@ -9,7 +9,8 @@ export const handler = async (event) => {
       };
     }
 
-    const apiUrl = `https://bankaccountdata.gocardless.com/api/v2/${path.replace(/^\/+/, '')}`;
+    const cleanPath = path.replace(/^\/+/, '');
+    const apiUrl = `https://bankaccountdata.gocardless.com/api/v2/${cleanPath}`;
 
     const response = await fetch(apiUrl, {
       method,
