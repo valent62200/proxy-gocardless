@@ -1,6 +1,8 @@
-export const handler = async (event) => {
+const fetch = require('node-fetch');
+
+exports.handler = async (event) => {
   try {
-    const { path, method, headers = {}, body } = JSON.parse(event.body || '{}');
+    const { path, method, headers, body } = JSON.parse(event.body || '{}');
 
     if (!path || !method) {
       return {
@@ -9,9 +11,7 @@ export const handler = async (event) => {
       };
     }
 
-    const cleanPath = path.replace(/^\/+/, '');
-    const apiUrl = `https://bankaccountdata.gocardless.com/api/v2/${cleanPath}`;
-
+    const apiUrl = `https://bankaccountdata.gocardless.com/api/v2/${path.replace(/^\/+/, '')}`;
     const response = await fetch(apiUrl, {
       method,
       headers,
@@ -22,12 +22,21 @@ export const handler = async (event) => {
 
     return {
       statusCode: response.status,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+      },
       body: JSON.stringify(data),
     };
-
   } catch (error) {
     return {
       statusCode: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+      },
       body: JSON.stringify({ error: error.message, stack: error.stack }),
     };
   }
