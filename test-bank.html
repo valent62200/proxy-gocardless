@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Connexion à ma banque - Test</title>
+</head>
+<body>
+  <h1>Test connexion GoCardless via proxy Netlify</h1>
+  <button id="connectBtn">Connexion à ma banque</button>
+
+  <script>
+    const proxyUrl = "https://exquisite-clafoutis-31a030.netlify.app/.netlify/functions/gocardless-proxy";
+    const apiKey = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2Nzg1NTYyLCJqdGkiOiJhYjBhYTA2ZDFlNTY0ZmRkOWIwNDE0NDIwN2IxMzgxZiIsInV1aWQiOiJmMzVkY2QwYS0zZTc4LTRhZGMtOWFlNS0yODI4YjNlMjI0NTciLCJhbGxvd2VkX2NpZHJzIjpbIjAuMC4wLjAvMCIsIjo6LzAiXX0.d7SE1yaBz8f7-W5BputHhc-ZuspVaphMwdwCeXh945A";
+
+    const userId = "test-user-id"; // remplace si besoin par currentUser.uid
+    const institutionId = "NORDLB_DEMO"; // institution de test
+
+    document.getElementById("connectBtn").addEventListener("click", async () => {
+      try {
+        const res = await fetch(proxyUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            path: "requisitions/",
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${apiKey}`,
+              "Content-Type": "application/json"
+            },
+            body: {
+              redirect: window.location.origin + "/bank-callback",
+              institution_id: institutionId,
+              reference: userId,
+              user_language: "FR"
+            }
+          })
+        });
+
+        const data = await res.json();
+        console.log("Réponse GoCardless :", data);
+
+        if (data.link) {
+          window.open(data.link, "_blank");
+        } else {
+          alert("Erreur : lien manquant dans la réponse.");
+        }
+      } catch (e) {
+        console.error("Erreur fetch proxy :", e);
+        alert("Erreur de connexion : " + e.message);
+      }
+    });
+  </script>
+</body>
+</html>
