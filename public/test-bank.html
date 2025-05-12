@@ -6,12 +6,12 @@
 </head>
 <body>
   <h1>Appeler GoCardless via Proxy</h1>
-  <button id="call-api">Appeler GoCardless</button>
+  <button onclick="callGoCardless()">Appeler GoCardless</button>
 
   <pre id="response"></pre>
 
   <script>
-    document.getElementById('call-api').addEventListener('click', async () => {
+    async function callGoCardless() {
       try {
         const response = await fetch('/api/gocardless-proxy', {
           method: 'POST',
@@ -20,17 +20,16 @@
           },
           body: JSON.stringify({
             path: 'institutions?country=FR',
-            method: 'GET',
-            headers: {}
+            method: 'GET'
           })
         });
 
         const data = await response.json();
         document.getElementById('response').textContent = JSON.stringify(data, null, 2);
       } catch (error) {
-        document.getElementById('response').textContent = 'Erreur : ' + error.message;
+        document.getElementById('response').textContent = `Erreur : ${error.message}`;
       }
-    });
+    }
   </script>
 </body>
 </html>
