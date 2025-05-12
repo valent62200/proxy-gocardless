@@ -2,29 +2,35 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Test GoCardless</title>
+  <title>Test GoCardless API Proxy</title>
 </head>
 <body>
-  <button onclick="callApi()">Appeler GoCardless</button>
-  <pre id="result"></pre>
+  <h1>Appeler GoCardless via Proxy</h1>
+  <button id="call-api">Appeler GoCardless</button>
+
+  <pre id="response"></pre>
 
   <script>
-    async function callApi() {
-      const response = await fetch('/api/gocardless-proxy', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ2Nzg1NTYyLCJqdGkiOiJhYjBhYTA2ZDFlNTY0ZmRkOWIwNDE0NDIwN2IxMzgxZiIsInV1aWQiOiJmMzVkY2QwYS0zZTc4LTRhZGMtOWFlNS0yODI4YjNlMjI0NTciLCJhbGxvd2VkX2NpZHJzIjpbIjAuMC4wLjAvMCIsIjo6LzAiXX0.d7SE1yaBz8f7-W5BputHhc-ZuspVaphMwdwCeXh945A'
-        },
-        body: JSON.stringify({
-          path: 'institutions?country=FR',
-          method: 'GET'
-        })
-      });
+    document.getElementById('call-api').addEventListener('click', async () => {
+      try {
+        const response = await fetch('/api/gocardless-proxy', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            path: 'institutions?country=FR',
+            method: 'GET',
+            headers: {}
+          })
+        });
 
-      const data = await response.json();
-      document.getElementById('result').textContent = JSON.stringify(data, null, 2);
-    }
+        const data = await response.json();
+        document.getElementById('response').textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById('response').textContent = 'Erreur : ' + error.message;
+      }
+    });
   </script>
 </body>
 </html>
