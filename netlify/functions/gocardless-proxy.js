@@ -1,40 +1,34 @@
 const fetch = require('node-fetch');
 
-exports.handler = async function(event, context) {
-  const { path, method, headers, body } = JSON.parse(event.body || '{}');
+exports.handler = async (event) => {
+  const { path, httpMethod, headers, body } = event;
+  const targetPath = path.replace("/api/", "");
 
-  if (!path || !method) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: 'Missing `path` or `method` in request body.' })
-    };
-  }
+  const apiUrl = `https://bankaccountdata.gocardless.com/${targetPath}`;
+  const apiKey = process.env.VITE_GOCARDLESS_API_KEY;
 
-  const apiUrl = `https://bankaccountdata.gocardless.com/api/v2/${path}`;
-  
   try {
-    const response = await fetch(apiUrl, {
-      method,
+    const res = await fetch(apiUrl, {
+      method: httpMethod,
       headers: {
-        'Authorization': `Bearer ${process.env.VITE_GOCARDLESS_API_KEY}`,
-        'Content-Type': 'application/json',
-        ...(headers || {})
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        ...headers,
       },
-      body: ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase()) ? JSON.stringify(body) : undefined,
+      body: body && httpMethod !== "GET" ? body : undefined,
     });
 
-    const data = await response.json();
+    const data = await res.json();
 
     return {
-      statusCode: response.status,
+      statusCode: res.status,
       body: JSON.stringify(data),
     };
-
   } catch (error) {
-    console.error('Proxy error:', error);
+    console.error("Erreur proxy GoCardless:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Internal Server Error' }),
+      body: JSON.stringify({ message: "Erreur serveur proxy" }),
     };
   }
 };

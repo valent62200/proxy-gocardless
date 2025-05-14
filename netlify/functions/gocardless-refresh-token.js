@@ -1,33 +1,39 @@
 const fetch = require('node-fetch');
 
-exports.handler = async function(event, context) {
-  const secretId = process.env.VITE_GOCARDLESS_SECRET_ID;
-  const secretKey = process.env.VITE_GOCARDLESS_SECRET_KEY;
-  const refreshToken = process.env.VITE_GOCARDLESS_REFRESH_TOKEN;
+exports.handler = async (event) => {
+  if (event.httpMethod !== "POST") {
+    return {
+      statusCode: 405,
+      body: "Méthode non autorisée",
+    };
+  }
 
   try {
-    const response = await fetch('https://bankaccountdata.gocardless.com/api/v2/token/refresh/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const { refresh } = JSON.parse(event.body);
+
+    const res = await fetch("https://bankaccountdata.gocardless.com/token/refresh/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
-        secret_id: secretId,
-        secret_key: secretKey,
-        refresh: refreshToken
+        refresh,
+        secret_id: process.env.VITE_GOCARDLESS_SECRET_ID,
+        secret_key: process.env.VITE_GOCARDLESS_SECRET_KEY,
       }),
     });
 
-    const data = await response.json();
+    const data = await res.json();
 
     return {
-      statusCode: response.status,
+      statusCode: res.status,
       body: JSON.stringify(data),
     };
-
   } catch (error) {
-    console.error('Refresh token error:', error);
+    console.error("Erreur refresh token:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Internal Server Error' }),
+      body: JSON.stringify({ message: "Erreur serveur proxy refresh" }),
     };
   }
 };
