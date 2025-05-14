@@ -1,8 +1,12 @@
 [build]
   functions = "netlify/functions"
-  publish = "dist"
 
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/gocardless-proxy/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/refresh-token"
+  to = "/.netlify/functions/gocardless-refresh-token"
   status = 200
