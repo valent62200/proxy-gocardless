@@ -3,7 +3,7 @@
 
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/gocardless-proxy/:splat"
+  to = "/.netlify/functions/gocardless-proxy"
   status = 200
 
 [[redirects]]
