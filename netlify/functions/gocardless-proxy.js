@@ -8,12 +8,11 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({ message: "OK proxy Netlify !" }),
     };
   }
-
   // Proxy GoCardless pour les autres routes
   try {
     const { path, httpMethod, headers, body } = event;
     const targetPath = path.replace("/api/", "");
-    const apiUrl = `https://bankaccountdata.gocardless.com/${targetPath}`;
+    const apiUrl = `https://bankaccountdata.gocardless.com/api/v2/${targetPath}`;
     const apiKey = process.env.GOCARDLESS_API_KEY; // SANS VITE_
 
     if (!apiKey) {
