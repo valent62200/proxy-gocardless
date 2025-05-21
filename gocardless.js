@@ -1,26 +1,33 @@
+// /api/gocardless.js
+
 export default async function handler(req, res) {
-  // Route de test pour vérifier si l’API répond
-  if (req.query.test) {
-    return res.status(200).json({ message: "OK proxy Vercel !" });
+  // Récupère la clé API depuis les variables d'environnement Vercel
+  const apiKey = process.env.GOCARDLESS_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ message: "Clé API GoCardless manquante côté serveur" });
   }
 
-  // Proxy vers GoCardless (exemple GET)
-  const apiKey = process.env.GOCARDLESS_API_KEY; // À définir dans tes variables d’environnement Vercel
-  const goCardlessUrl = "https://bankaccountdata.gocardless.com/api/v2/requisitions/";
+  // Prépare l'URL cible en fonction de la requête
+  const targetPath = req.url.replace("/api/gocardless", "");
+  const apiUrl = `https://bankaccountdata.gocardless.com${targetPath}`;
 
   try {
-    const response = await fetch(goCardlessUrl, {
-      method: "GET",
+    // Forward la requête vers l'API GoCardless
+    const fetchResponse = await fetch(apiUrl, {
+      method: req.method,
       headers: {
         Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json"
-      }
+        "Content-Type": "application/json",
+        ...req.headers,
+      },
+      body: req.method !== "GET" ? JSON.stringify(req.body) : undefined,
     });
 
-    const data = await response.json();
-    res.status(response.status).json(data);
+    // Récupère les données et les renvoie
+    const data = await fetchResponse.json();
+    res.status(fetchResponse.status).json(data);
   } catch (error) {
     console.error("Erreur proxy GoCardless:", error);
-    res.status(500).json({ message: "Erreur serveur proxy", details: error.message });
+    res.status(500).json({ message: "Erreur serveur proxy" });
   }
 }
