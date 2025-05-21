@@ -1,4 +1,11 @@
-const fetch = require('node-fetch');
+exports.handler = async (event, context) => {
+  // Bloc de test pour /test
+  if (event.path && event.path.endsWith('/test')) {
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: "OK proxy Netlify !" }),
+    };
+  }const fetch = require('node-fetch');
 
 exports.handler = async (event) => {
   const { path, httpMethod, headers, body } = event;
