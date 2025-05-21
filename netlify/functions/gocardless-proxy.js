@@ -1,3 +1,5 @@
+const fetch = require('node-fetch');
+
 exports.handler = async (event, context) => {
   // Bloc de test pour /test
   if (event.path && event.path.endsWith('/test')) {
@@ -5,14 +7,13 @@ exports.handler = async (event, context) => {
       statusCode: 200,
       body: JSON.stringify({ message: "OK proxy Netlify !" }),
     };
-  }const fetch = require('node-fetch');
+  }
 
-exports.handler = async (event) => {
+  // Proxy GoCardless pour les autres routes
   const { path, httpMethod, headers, body } = event;
   const targetPath = path.replace("/api/", "");
-
   const apiUrl = `https://bankaccountdata.gocardless.com/${targetPath}`;
-  const apiKey = process.env.VITE_GOCARDLESS_API_KEY;
+  const apiKey = process.env.GOCARDLESS_API_KEY; // <--- (Sans VITE_ !)
 
   try {
     const res = await fetch(apiUrl, {
