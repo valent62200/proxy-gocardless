@@ -10,12 +10,20 @@ exports.handler = async (event, context) => {
   }
 
   // Proxy GoCardless pour les autres routes
-  const { path, httpMethod, headers, body } = event;
-  const targetPath = path.replace("/api/", "");
-  const apiUrl = `https://bankaccountdata.gocardless.com/${targetPath}`;
-  const apiKey = process.env.GOCARDLESS_API_KEY; // <--- (Sans VITE_ !)
-
   try {
+    const { path, httpMethod, headers, body } = event;
+    const targetPath = path.replace("/api/", "");
+    const apiUrl = `https://bankaccountdata.gocardless.com/${targetPath}`;
+    const apiKey = process.env.GOCARDLESS_API_KEY; // SANS VITE_
+
+    if (!apiKey) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ message: "Clé API GoCardless manquante" }),
+      };
+    }
+
+    // Envoi la requête à GoCardless
     const res = await fetch(apiUrl, {
       method: httpMethod,
       headers: {
@@ -40,3 +48,4 @@ exports.handler = async (event, context) => {
     };
   }
 };
+
