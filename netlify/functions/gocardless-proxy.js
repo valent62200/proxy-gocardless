@@ -8,21 +8,27 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({ message: "OK proxy Netlify !" }),
     };
   }
+
   // Proxy GoCardless pour les autres routes
   try {
     const { path, httpMethod, headers, body } = event;
     const targetPath = path.replace("/api/", "");
-    const apiUrl = `https://bankaccountdata.gocardless.com/api/v2/${targetPath}`;
-    const apiKey = process.env.GOCARDLESS_API_KEY; // SANS VITE_
+    const apiUrl = `https://bankaccountdata.gocardless.com/api/v2/${targetPath}`; // <-- Très important
+
+    const apiKey = process.env.GOCARDLESS_API_KEY;
+
+    // LOGS DEBUG
+    console.log('API KEY GOCARDLESS:', apiKey ? '[OK - PRÉSENTE]' : '[NON TROUVÉE]');
+    console.log('API URL:', apiUrl);
 
     if (!apiKey) {
       return {
         statusCode: 500,
-        body: JSON.stringify({ message: "Clé API GoCardless manquante" }),
+        body: JSON.stringify({ message: "Clé API GoCardless manquante côté serveur" }),
       };
     }
 
-    // Envoi la requête à GoCardless
+    // Requête vers GoCardless API
     const res = await fetch(apiUrl, {
       method: httpMethod,
       headers: {
@@ -47,4 +53,3 @@ exports.handler = async (event, context) => {
     };
   }
 };
-
