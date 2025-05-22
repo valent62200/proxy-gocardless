@@ -1,17 +1,16 @@
 export default async function handler(req, res) {
-  // Remplace par ta clé API GoCardless (mieux : utilise process.env.GC_API_KEY)
   const API_KEY = process.env.GC_API_KEY;
 
   const response = await fetch('https://bankaccountdata.gocardless.com/api/v2/requisitions/', {
     method: 'POST',
     headers: {
-      'Authorization': `Token ${API_KEY}`,
+      'Authorization': `Bearer ${API_KEY}`,
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      redirect: "https://celebrated-lebkuchen-4dab66.netlify.app/dashboard", // remplace par ton vrai redirect
-      institution_id: "SG_SOGEFRPP",              // remplace par une banque de test (ex : "OB-XYZ")
-      reference: "user1234"                       // un identifiant unique
+      redirect: "https://celebrated-lebkuchen-4dab66.netlify.app/dashboard",
+      institution_id: "SG_SOGEFRPP",
+      reference: "user1234"
     })
   });
 
