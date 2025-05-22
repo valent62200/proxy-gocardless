@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     body: JSON.stringify({
       redirect: "https://celebrated-lebkuchen-4dab66.netlify.app/dashboard",
       institution_id: "SG_SOGEFRPP",
-      reference: "user12345"
+      reference: "uservds12345"
     })
   });
 
