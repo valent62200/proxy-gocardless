@@ -1,33 +1,27 @@
-// /api/gocardless.js
-
 export default async function handler(req, res) {
-  // Récupère la clé API depuis les variables d'environnement Vercel
-  const apiKey = process.env.GOCARDLESS_API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({ message: "Clé API GoCardless manquante côté serveur" });
-  }
+  const API_KEY = process.env.GC_API_KEY;
+  const baseUrl = "https://bankaccountdata.gocardless.com/api/v2/";
 
-  // Prépare l'URL cible en fonction de la requête
-  const targetPath = req.url.replace("/api/gocardless", "");
-  const apiUrl = `https://bankaccountdata.gocardless.com${targetPath}`;
-
-  try {
-    // Forward la requête vers l'API GoCardless
-    const fetchResponse = await fetch(apiUrl, {
-      method: req.method,
+  // Exemple : route POST /api/gocardless/requisitions/
+  if (req.method === "POST" && req.url.endsWith("requisitions")) {
+    const { institution_id, reference, redirect } = req.body;
+    const response = await fetch(`${baseUrl}requisitions/`, {
+      method: "POST",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        ...req.headers,
+        Authorization: `Bearer ${API_KEY}`,
+        "Content-Type": "application/json"
       },
-      body: req.method !== "GET" ? JSON.stringify(req.body) : undefined,
+      body: JSON.stringify({
+        institution_id,
+        reference,
+        redirect
+      })
     });
 
-    // Récupère les données et les renvoie
-    const data = await fetchResponse.json();
-    res.status(fetchResponse.status).json(data);
-  } catch (error) {
-    console.error("Erreur proxy GoCardless:", error);
-    res.status(500).json({ message: "Erreur serveur proxy" });
+    const data = await response.json();
+    return res.status(response.status).json(data);
   }
+
+  // Ajoute d'autres routes GoCardless ici (ex : GET requisitions/id etc)
+  return res.status(404).json({ error: "Not found" });
 }
