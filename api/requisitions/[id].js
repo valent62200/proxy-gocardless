@@ -1,24 +1,26 @@
 export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === "OPTIONS") return res.status(200).end();
+
   const { id } = req.query;
+  if (req.method !== "GET") {
+    return res.status(405).json({ error: "Méthode non autorisée" });
+  }
   const API_KEY = process.env.GC_API_KEY;
-
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Méthode non autorisée' });
-  }
-
-  const response = await fetch(`https://bankaccountdata.gocardless.com/api/v2/requisitions/${id}/`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${API_KEY}`,
-      'Content-Type': 'application/json'
+  try {
+    const response = await fetch(`https://bankaccountdata.gocardless.com/api/v2/requisitions/${id}/`, {
+      headers: { 'Authorization': `Bearer ${API_KEY}` }
+    });
+    const text = await response.text();
+    try {
+      const data = JSON.parse(text);
+      return res.status(response.status).json(data);
+    } catch (e) {
+      return res.status(500).json({ error: "La réponse GoCardless n'est pas du JSON", raw: text });
     }
-  });
-
-  if (!response.ok) {
-    const error = await response.text();
-    return res.status(response.status).json({ error });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
   }
-
-  const data = await response.json();
-  res.status(200).json(data);
 }
