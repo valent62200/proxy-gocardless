@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Méthode non autorisée' });
+    return res.status(405).json({ error: "Méthode non autorisée" });
   }
 
   const API_KEY = process.env.GC_API_KEY;
@@ -19,7 +19,13 @@ export default async function handler(req, res) {
   });
 
   if (!response.ok) {
-    const error = await response.text();
+    let error = "Erreur inconnue";
+    try {
+      const errData = await response.json();
+      error = errData.error || JSON.stringify(errData) || error;
+    } catch {
+      error = await response.text() || error;
+    }
     return res.status(response.status).json({ error });
   }
 
